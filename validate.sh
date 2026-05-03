@@ -69,7 +69,7 @@ try:
 except ImportError:
     # PyYAML not available — do a basic key-presence check instead
     fm = m.group(1)
-    required = ["description", "allowed-tools"]
+    required = ["name", "description", "allowed-tools"]
     missing = [k for k in required if k + ":" not in fm]
     if missing:
         print(f"  missing keys: {missing}", file=sys.stderr)
@@ -85,7 +85,7 @@ PYEOF
   fi
 }
 
-validate_skill "plugins/cybrix-deploy/skills/deploy/SKILL.md"
+validate_skill "plugins/cybrix-deploy/skills/cybrix-deploy/SKILL.md"
 
 # ── summary ───────────────────────────────────────────────────────────────────
 
