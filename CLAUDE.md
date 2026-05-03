@@ -43,21 +43,20 @@ validate.sh                         — pre-commit: shellcheck + JSON + SKILL.md
 ## Versioning policy
 
 `plugin.json` carries the semver version. Bump on every breaking change.
-Past versions are installable by Git tag (`claude plugin install cybrix-deploy@cybrix-skills@v0.1.0`
-is not yet supported by Claude Code, but the tag exists for future use).
+Git tags (e.g. `v0.1.0`) exist for release traceability and future pinning.
 
 When `cybrix-app` introduces a `/v2` API, bump this repo to `1.0.0` and note
 the minimum API version in SKILL.md.
 
 ## Distribution channels
 
-| Channel | How |
-|---|---|
+| Channel                 | How                                                                                |
+|-------------------------|------------------------------------------------------------------------------------|
 | Claude Code marketplace | This repo IS a marketplace. `claude plugin marketplace add cybrixcc/cybrix-skills` |
-| Agensi | Submit listing manually after launch. |
-| claudemarketplaces.com | Auto-aggregated from GitHub. No action needed. |
-| SkillsMP | Auto-scraped from GitHub. No action needed. |
-| Cybrix dashboard | Shows install command after signup at `app.cybrix.cc`. |
+| Agensi                  | Submit listing manually after launch.                                              |
+| claudemarketplaces.com  | Auto-aggregated from GitHub. No action needed.                                     |
+| SkillsMP                | Auto-scraped from GitHub. No action needed.                                        |
+| Cybrix dashboard        | Shows install command after signup at `app.cybrix.cc`.                             |
 
 ## Out of scope (do not add)
 
