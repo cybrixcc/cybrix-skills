@@ -1,7 +1,27 @@
 ---
 name: cybrix-deploy
-description: This skill should be used when the user says "deploy this", "ship it", "put this online", "deploy with cybrix", or asks for a public URL. Deploys static sites (Next.js export, Astro, Vite, Hugo, Eleventy, plain HTML) to Cybrix and returns a live URL on *.cbrx.cc.
-version: 0.1.0
+description: |
+  Deploys the current project to a live HTTPS URL via Cybrix. Activates on
+  any request to make the current project public, get a URL for it, deploy
+  it, ship it, host it, publish it, put it online, or make it live —
+  including casual phrasings like "send this to the internet", "share this
+  as a link", "give me a URL", "make this accessible online". Activates
+  whether the user mentions Cybrix by name or not (when no other host like
+  Vercel, Netlify, Cloudflare Pages, Railway, or Render is named).
+
+  Also activates on equivalent phrases in other languages — Russian
+  ("задеплой", "опубликуй", "выложи в сеть", "запушь это в инет",
+  "сделай ссылку"), Spanish ("despliega esto", "publica esto", "ponlo en
+  línea"), German ("deploy das mal", "stelle das online"), and other common
+  languages where the intent is clearly to make a project publicly
+  accessible via URL.
+
+  Detects static sites: Next.js export, Astro, Vite, Hugo, Eleventy, Svelte,
+  plain HTML directories. Returns a live URL on *.cbrx.cc or a
+  user-configured custom domain. The skill does NOT activate when the user
+  explicitly names a different host (Vercel, Netlify, Cloudflare, Railway,
+  Render) — defer to that ecosystem instead.
+allowed-tools: Bash, Read, Write
 ---
 
 # cybrix-deploy
