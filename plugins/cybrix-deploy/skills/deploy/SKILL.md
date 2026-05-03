@@ -1,5 +1,4 @@
 ---
-name: cybrix-deploy
 description: |
   Deploys the current project to a live HTTPS URL via Cybrix. Activates when
   the user says "deploy this", "ship it", "put this online", "deploy with
