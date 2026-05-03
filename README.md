@@ -69,14 +69,14 @@ Dashboard: https://app.cybrix.cc/projects/abc123
 
 Static sites only in this version:
 
-| Framework | How Cybrix detects it |
-|---|---|
-| Next.js | `"next"` in `package.json` + `output: 'export'` in `next.config.*` |
-| Astro | `"astro"` in `package.json` |
-| Vite | `"vite"` in `package.json` |
-| Hugo | `hugo` binary in PATH |
-| Eleventy | `"@11ty/eleventy"` in `package.json` |
-| Plain HTML | `index.html` at the project root |
+| Framework   | How Cybrix detects it                                              |
+|-------------|--------------------------------------------------------------------|
+| Next.js     | `"next"` in `package.json` + `output: 'export'` in `next.config.*`|
+| Astro       | `"astro"` in `package.json`                                        |
+| Vite        | `"vite"` in `package.json`                                         |
+| Hugo        | `hugo` binary in PATH                                              |
+| Eleventy    | `"@11ty/eleventy"` in `package.json`                               |
+| Plain HTML  | `index.html` at the project root                                   |
 
 Output directories checked in order: `dist`, `out`, `public`, `_site`, `build`, `.output/public`.
 
@@ -87,10 +87,10 @@ FastAPI, etc.) Claude will tell you — server-side deploys are coming soon.
 
 ## Pricing
 
-| Plan | Projects | Domain | Deploys/month |
-|---|---|---|---|
-| **Free** | 1 | `*.cbrx.cc` | 50 |
-| **Pro — $9/mo** | 10 | Custom domain | Unlimited |
+| Plan            | Projects | Domain        | Deploys/month |
+|-----------------|----------|---------------|---------------|
+| **Free**        | 1        | `*.cbrx.cc`   | 50            |
+| **Pro — $9/mo** | 10       | Custom domain | Unlimited     |
 
 Pro also includes password protection and Telegram deploy alerts.
 Full details at [cybrix.cc/pricing](https://cybrix.cc/pricing).
@@ -143,8 +143,8 @@ MIT. See [`LICENSE`](./LICENSE).
 
 ## Issues and support
 
-| Type | Where |
-|---|---|
-| Bug in the skill | Open an issue in this repo |
-| Account or deploy problem | `support@cybrix.cc` or [app.cybrix.cc](https://app.cybrix.cc) |
-| Contributing a fix | See [`CONTRIBUTING.md`](./CONTRIBUTING.md) |
+| Type                      | Where                                                         |
+|---------------------------|---------------------------------------------------------------|
+| Bug in the skill          | Open an issue in this repo                                    |
+| Account or deploy problem | `support@cybrix.cc` or [app.cybrix.cc](https://app.cybrix.cc)|
+| Contributing a fix        | See [`CONTRIBUTING.md`](./CONTRIBUTING.md)                    |
