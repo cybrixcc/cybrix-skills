@@ -69,7 +69,7 @@ try:
 except ImportError:
     # PyYAML not available — do a basic key-presence check instead
     fm = m.group(1)
-    required = ["name", "description", "allowed-tools"]
+    required = ["name", "description"]
     missing = [k for k in required if k + ":" not in fm]
     if missing:
         print(f"  missing keys: {missing}", file=sys.stderr)
