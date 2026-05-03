@@ -102,7 +102,7 @@ case "$HTTP_CODE" in
     [[ "$HTTP_CODE" == "200" || "$HTTP_CODE" == "201" || "$HTTP_CODE" == "202" ]] \
       || die "upload failed after retry (HTTP $HTTP_CODE): $RESPONSE_BODY"
     ;;
-  5*) die "server error (HTTP $HTTP_CODE). Try again or check https://status.cybrix.cc — $RESPONSE_BODY" ;;
+  5*) die "API returned a server error (HTTP $HTTP_CODE). Wait a moment and try again, or check https://app.cybrix.cc/dashboard for status. Response: $RESPONSE_BODY" ;;
   *)  die "unexpected response (HTTP $HTTP_CODE): $RESPONSE_BODY" ;;
 esac
 
