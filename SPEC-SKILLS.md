@@ -140,17 +140,43 @@ marketplaces are a long-term moat, not a launch channel.
 
 ```
 cybrix-skills/
-├── README.md            — install instructions and pricing
-├── LICENSE              — MIT
+├── README.md                           — install instructions, usage, troubleshooting
+├── LICENSE                             — MIT
+├── CLAUDE.md                           — AI/contributor entry point
+├── CONTRIBUTING.md                     — external contributor guide
+├── SPEC-SKILLS.md                      — this file (canonical spec)
+├── validate.sh                         — pre-commit: shellcheck + JSON + SKILL.md YAML
 ├── .gitignore
-├── SPEC-SKILLS.md       — this file
-├── plugin.json          — Claude Code plugin manifest
-├── SKILL.md             — model-invoked instructions for cybrix-deploy
 ├── .claude-plugin/
-│   └── marketplace.json — repo doubles as a marketplace
-└── scripts/
-    └── deploy.sh        — bash helper called by SKILL.md
+│   └── marketplace.json                — repo IS a Claude Code marketplace
+├── .github/
+│   └── workflows/
+│       └── lint.yml                    — CI: shellcheck on all scripts
+├── plugins/
+│   └── cybrix-deploy/
+│       ├── .claude-plugin/
+│       │   └── plugin.json             — plugin manifest (name, version, author…)
+│       ├── skills/
+│       │   └── cybrix-deploy/
+│       │       └── SKILL.md            — model-invoked skill instructions
+│       └── scripts/
+│           ├── deploy.sh               — tar + multipart POST + polling helper
+│           ├── test-mock-server.sh     — local Python mock for E2E testing
+│           └── README.md               — testing instructions
+└── test-fixtures/
+    └── static-site/                    — 3-file HTML fixture for manual E2E tests
+        ├── index.html
+        ├── style.css
+        └── app.js
 ```
+
+> **ADR-S-0001 (2026-05-03): Adopted official Claude Code marketplace layout.**
+> The initial commit placed `SKILL.md`, `plugin.json`, and `scripts/` at the
+> repo root. The Claude Code marketplace spec requires plugins to live under
+> `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest and skills
+> under `skills/<name>/SKILL.md`. The repo was restructured on 2026-05-03 to
+> match this layout before the v0.1.0 release. The old flat layout would have
+> prevented `claude plugin install` from working correctly.
 
 No `.ai/` directory in this repo. The repo is small (under a dozen files,
 churn rate roughly twice a quarter), and the SPEC plus SKILL.md are
