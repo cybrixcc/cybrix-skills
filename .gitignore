@@ -1,0 +1,10 @@
+# project deploy cache (written by cybrix-deploy skill)
+.cybrix/
+
+# macOS
+.DS_Store
+
+# editor
+.idea/
+.vscode/
+*.swp
