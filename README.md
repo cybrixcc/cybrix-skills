@@ -1,9 +1,10 @@
 # Cybrix — deploy from Claude Code
 
-Cybrix is a hosting service for static sites. This repo adds a `/cybrix-deploy`
-skill to [Claude Code](https://claude.ai/code) so you can deploy by saying
-**"deploy this with cybrix"** in the chat — Claude runs the build, packages the
-output, uploads it, and hands you a live HTTPS URL in under 60 seconds.
+Cybrix is a hosting service for static sites. This repo adds a
+**cybrix-deploy** skill to [Claude Code](https://claude.ai/code) so you can
+deploy by saying **"deploy this with cybrix"** in the chat — Claude runs the
+build, packages the output, uploads it, and hands you a live HTTPS URL in
+under 60 seconds.
 
 No config files. No CI setup. Just talk to Claude.
 
