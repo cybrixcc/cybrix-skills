@@ -16,11 +16,12 @@ description: |
   languages where the intent is clearly to make a project publicly
   accessible via URL.
 
-  Detects static sites: Next.js export, Astro, Vite, Hugo, Eleventy, Svelte,
-  plain HTML directories. Returns a live URL on *.cbrx.cc or a
-  user-configured custom domain. The skill does NOT activate when the user
-  explicitly names a different host (Vercel, Netlify, Cloudflare, Railway,
-  Render) — defer to that ecosystem instead.
+  Uses heuristic detection to determine if a project is static or needs a
+  server runtime — works with any framework, not just a known list.
+  Automatically detects and handles environment variables so the build
+  receives everything it needs. Returns a live URL on *.cbrx.cc or a
+  user-configured custom domain. Does NOT activate when the user explicitly
+  names a different host (Vercel, Netlify, Cloudflare, Railway, Render).
 allowed-tools: Bash, Read, Write
 ---
 
@@ -44,28 +45,120 @@ Do not proceed without a token.
 
 ## Deployment workflow
 
-### Step 1 — Detect project type
+### Step 1 — Detect project type (heuristic)
 
-Read `package.json` if present. Check for these signals:
+Do not rely on a framework whitelist. Instead, look for signals and
+classify the project as **static**, **server**, or **unknown**.
 
-- `"next"` in dependencies AND a `build` script that produces static output
-  (look for `output: 'export'` in `next.config.*`).
-- `"astro"` in dependencies.
-- `"vite"` in dependencies and a `build` script.
-- `"@11ty/eleventy"`, `"hugo"`, or other static generators.
-- A standalone `index.html` at the project root.
+**Static signals** (proceed with deploy):
 
-Static output directories to check, in order: `dist`, `out`, `public`,
+- `package.json` has a `build` script AND output lands in `dist/`, `out/`,
+  `build/`, `public/`, `_site/`, or `.output/public/`
+- `next.config.{js,ts,mjs}` with `output: 'export'` or `output: 'static'`
+- `astro.config.{js,ts,mjs}` present (default mode is static)
+- `vite.config.{js,ts}` without SSR plugins
+- `_config.yml` (Jekyll), `config.toml` or `hugo.toml` (Hugo),
+  `.eleventy.js` / `eleventy.config.js` (Eleventy),
+  `zola.toml` (Zola)
+- Only HTML/CSS/JS files at root, no server entry point
+
+**Server signals** (refuse — see below):
+
+- `Dockerfile` or `docker-compose.yml` (unless it only copies a static
+  `dist/`)
+- `main.go`, `server.go`, or any `*.go` containing `net/http` or
+  `ListenAndServe`
+- `main.py`, `app.py`, `server.py` with `uvicorn`, `gunicorn`, `flask`,
+  `fastapi` imports, or a `if __name__ == '__main__'` block calling
+  `app.run` / `serve` / `asyncio.run`
+- `main.rs` or `server.rs` with `actix`, `axum`, `rocket`, `warp`,
+  or `tokio::main`
+- `package.json` with a `start` script that runs `node`/`tsx`/`bun` on a
+  server file (NOT `next start` in a static-export config)
+- `Gemfile` with `puma`, `unicorn`, `rails`, or `sinatra`
+- `pom.xml` or `build.gradle` with `spring-boot`
+- `.csproj` with ASP.NET
+
+**Database signals** (warn but allow if everything else is static):
+
+- `*.sql` files, `migrations/` folder, `prisma/schema.prisma`,
+  `drizzle.config.*`, `DATABASE_URL` referenced in source
+- A static site hitting a hosted DB from the browser is unusual but valid.
+  Warn the user, don't refuse.
+
+**When refusing** (server signals detected):
+
+> This looks like a project that needs a server runtime — I detected
+> `<specific signal, e.g. "main.go with net/http" or "Dockerfile with EXPOSE">`.
+>
+> Cybrix currently supports static sites only. Your options:
+> 1. Convert to a static export (e.g. Next.js `output: 'export'`, Astro,
+>    Hugo).
+> 2. Use a service that supports backends: Railway, Fly.io, Render.
+> 3. Tell me to deploy anyway if you think the detection is wrong.
+
+Always allow option 3 — heuristics are imperfect and the user knows
+their project.
+
+**Static output directories** to check, in order: `dist`, `out`, `public`,
 `_site`, `build`, `.output/public`.
 
-If the project appears to need a server runtime (Express, Fastify, Next.js
-without static export, FastAPI, Django, Rails), STOP and tell the user:
+### Step 2 — Scan environment variables
 
-> Cybrix MVP supports static sites only. Your project looks like it needs
-> a server runtime. Server-side deploys are coming soon — for now, use a
-> different host or convert this to a static export if possible.
+After confirming the project is static but BEFORE running the build, scan
+for environment variables the build will need.
 
-### Step 2 — Confirm with the user
+**2a. Read .env files** — parse `KEY=value` format, skip comments (`#`)
+and blank lines. Files to check: `.env`, `.env.local`, `.env.production`,
+`.env.example`.
+
+**2b. Grep source code** for build-time env var references:
+
+- JS/TS: `process.env.X`, `import.meta.env.X`
+- Look in `src/`, `app/`, `pages/`, `components/` — any
+  `*.{js,jsx,ts,tsx,vue,svelte}`
+- Pay extra attention to `NEXT_PUBLIC_*`, `VITE_*`, `PUBLIC_*`,
+  `REACT_APP_*` — these are baked into the bundle at build time
+
+**2c. Cross-reference** keys found in code against keys present in .env
+files to find what the build needs.
+
+**2d. Show the user:**
+
+> I detected the following environment variables your build needs:
+>
+>   NEXT_PUBLIC_API_URL    (in .env.local, used in 3 files)
+>   VITE_STRIPE_KEY        (in .env.local, used in src/checkout.ts)
+>
+> These need to be set before the build. How would you like to provide
+> them?
+>
+>   1. Paste them here (sent encrypted with the deploy)
+>   2. Set them later in the dashboard
+>   3. Skip (build may fail or site may not work correctly)
+
+If the user picks **option 1**, ask for each value one at a time. Include
+them in the multipart POST to `/v1/deploys` as an `env_vars` field
+(JSON map: `{"KEY": "value", ...}`).
+
+**2e. Warn about missing variables** — if a var is referenced in code but
+not in any .env file:
+
+> ⚠ `AUTH_SECRET` is referenced in your code but not in any .env file.
+> Provide it now or the build may fail.
+
+**2f. Refuse to forward secrets in client-exposed vars** — if a key with
+a client prefix (`NEXT_PUBLIC_*`, `VITE_*`, `REACT_APP_*`, `PUBLIC_*`)
+looks like a secret (`*_SECRET`, `*_PRIVATE_KEY`, `DATABASE_URL`,
+`JWT_SECRET`):
+
+> ⚠ `NEXT_PUBLIC_JWT_SECRET` looks like a private secret but has a
+> client-bundle prefix — it will be visible to anyone who opens your
+> site's source. Are you sure you want to include it?
+
+Do not send it without explicit confirmation.
+
+### Step 3 — Confirm with the user
 
 Present a short summary:
 
@@ -74,12 +167,13 @@ Present a short summary:
 > - Project name: <inferred-from-folder>
 > - Build command: <detected, e.g. npm run build>
 > - Output directory: <detected, e.g. out>
+> - Env vars: <count> variables included / none detected
 >
 > Continue? (yes / change name / change build / change output)
 
 Use the answers to override defaults.
 
-### Step 3 — Build
+### Step 4 — Build
 
 Run the build command in the project root. Stream output to the user.
 
@@ -87,21 +181,21 @@ If the build fails, do not retry. Show the last 40 lines and say:
 
 > Build failed. Fix the error above and try again.
 
-### Step 4 — Deploy
+### Step 5 — Deploy
 
 Run `${CLAUDE_PLUGIN_ROOT}/scripts/deploy.sh <project_name> <output_dir>`.
 The script:
 
 1. Tars and gzips the output directory.
-2. POSTs the tarball to `https://api.cybrix.cc/v1/deploys` as multipart form
-   data with fields `project_name` and `tarball`. Includes
-   `Authorization: Bearer $CYBRIX_TOKEN`.
+2. POSTs the tarball to `https://api.cybrix.cc/v1/deploys` as multipart
+   form data with fields `project_name`, `tarball`, and optionally
+   `env_vars` (JSON map). Includes `Authorization: Bearer $CYBRIX_TOKEN`.
 3. Receives `{ deployment_id }` in the response.
 4. Polls `https://api.cybrix.cc/v1/deploys/<id>` every 2 seconds until
    status is `live` or `failed` (max 5 minutes).
 5. Prints the result as JSON on stdout.
 
-### Step 5 — Report to the user
+### Step 6 — Report to the user
 
 On success:
 
