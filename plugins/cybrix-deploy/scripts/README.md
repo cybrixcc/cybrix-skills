@@ -9,12 +9,12 @@ deploy.sh <project_name> <output_dir>
 ```
 
 **Required (one of):**
-- `VIBEDEPLOY_API_TOKEN` env var, or
+- `CYBRIX_TOKEN` env var, or
 - `~/.config/cybrix/token`, or
 - `.cybrix/token` in the project root
 
 **Optional:**
-- `VIBEDEPLOY_API_URL` — override API base URL (default: `https://api.cybrix.cc`)
+- `CYBRIX_API_URL` — override API base URL (default: `https://api.cybrix.cc`)
 
 The script tarballs `<output_dir>`, POSTs to `POST /v1/deploys`, then polls
 `GET /v1/deploys/<id>` every 2 seconds until status is `live` or `failed`
@@ -36,8 +36,8 @@ scripts/test-mock-server.sh 18080
 **Terminal 2 — run deploy against the mock:**
 
 ```bash
-export VIBEDEPLOY_API_TOKEN=fake-token
-export VIBEDEPLOY_API_URL=http://localhost:18080
+export CYBRIX_TOKEN=fake-token
+export CYBRIX_API_URL=http://localhost:18080
 scripts/deploy.sh my-test-site ../../test-fixtures/static-site
 ```
 

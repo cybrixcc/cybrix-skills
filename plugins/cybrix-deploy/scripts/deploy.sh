@@ -6,12 +6,12 @@
 #   deploy.sh <project_name> <output_dir>
 #
 # Required (one of):
-#   VIBEDEPLOY_API_TOKEN   API token from app.cybrix.cc/dashboard
+#   CYBRIX_TOKEN   API token from app.cybrix.cc/dashboard
 #   ~/.config/cybrix/token
 #   .cybrix/token          in the project root (gitignored)
 #
 # Optional:
-#   VIBEDEPLOY_API_URL     defaults to https://api.cybrix.cc
+#   CYBRIX_API_URL     defaults to https://api.cybrix.cc
 
 set -euo pipefail
 
@@ -26,14 +26,14 @@ OUTPUT_DIR="${2:?usage: deploy.sh <project_name> <output_dir>}"
 
 # ── token resolution ─────────────────────────────────────────────────────────
 
-if [[ -z "${VIBEDEPLOY_API_TOKEN:-}" ]]; then
+if [[ -z "${CYBRIX_TOKEN:-}" ]]; then
   if [[ -r "${HOME}/.config/cybrix/token" ]]; then
-    VIBEDEPLOY_API_TOKEN="$(cat "${HOME}/.config/cybrix/token")"
+    CYBRIX_TOKEN="$(cat "${HOME}/.config/cybrix/token")"
   elif [[ -r ".cybrix/token" ]]; then
-    VIBEDEPLOY_API_TOKEN="$(cat ".cybrix/token")"
+    CYBRIX_TOKEN="$(cat ".cybrix/token")"
   else
-    die "VIBEDEPLOY_API_TOKEN is not set.
-  Set it with: export VIBEDEPLOY_API_TOKEN=<token>
+    die "CYBRIX_TOKEN is not set.
+  Set it with: export CYBRIX_TOKEN=<token>
   Or save your token to ~/.config/cybrix/token
   Get one free at https://app.cybrix.cc/dashboard"
   fi
@@ -41,7 +41,7 @@ fi
 
 # ── config ───────────────────────────────────────────────────────────────────
 
-API_URL="${VIBEDEPLOY_API_URL:-https://api.cybrix.cc}"
+API_URL="${CYBRIX_API_URL:-https://api.cybrix.cc}"
 
 # ── preflight ────────────────────────────────────────────────────────────────
 
@@ -73,7 +73,7 @@ HTTP_RESPONSE="$(
   curl -sS --fail-with-body \
     -w '\n__HTTP_CODE__:%{http_code}' \
     -X POST "$API_URL/v1/deploys" \
-    -H "Authorization: Bearer $VIBEDEPLOY_API_TOKEN" \
+    -H "Authorization: Bearer $CYBRIX_TOKEN" \
     -F "project_name=$PROJECT_NAME" \
     -F "tarball=@$TARBALL"
 )" || true
@@ -93,7 +93,7 @@ case "$HTTP_CODE" in
       curl -sS --fail-with-body \
         -w '\n__HTTP_CODE__:%{http_code}' \
         -X POST "$API_URL/v1/deploys" \
-        -H "Authorization: Bearer $VIBEDEPLOY_API_TOKEN" \
+        -H "Authorization: Bearer $CYBRIX_TOKEN" \
         -F "project_name=$PROJECT_NAME" \
         -F "tarball=@$TARBALL"
     )" || true
@@ -132,7 +132,7 @@ while true; do
 
   STATUS_RESPONSE="$(
     curl -sS "$API_URL/v1/deploys/$DEPLOYMENT_ID" \
-      -H "Authorization: Bearer $VIBEDEPLOY_API_TOKEN"
+      -H "Authorization: Bearer $CYBRIX_TOKEN"
   )"
 
   STATUS="$(printf '%s' "$STATUS_RESPONSE" \

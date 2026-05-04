@@ -45,7 +45,7 @@ Cloudflare, Railway). Defer.
 
 Before deploying, ensure the user has an API token. Check in this order:
 
-1. Environment variable `VIBEDEPLOY_API_TOKEN`.
+1. Environment variable `CYBRIX_TOKEN`.
 2. File `~/.config/cybrix/token`.
 3. File `.cybrix/token` in the project (gitignored).
 
@@ -53,7 +53,7 @@ If none exist, instruct the user:
 
 > You need a Cybrix API token. Get one free at
 > `https://app.cybrix.cc/dashboard` (no card required). Then run
-> `export VIBEDEPLOY_API_TOKEN=<token>` and try again.
+> `export CYBRIX_TOKEN=<token>` and try again.
 
 Do not proceed without a token.
 
@@ -109,7 +109,7 @@ Run `scripts/deploy.sh <project_name> <output_dir>`. The script:
 1. Tars and gzips the output directory.
 2. POSTs the tarball to `https://api.cybrix.cc/v1/deploys` as multipart form
    data with fields `project_name` and `tarball`. Includes
-   `Authorization: Bearer $VIBEDEPLOY_API_TOKEN`.
+   `Authorization: Bearer $CYBRIX_TOKEN`.
 3. Receives `{ deployment_id }` in the response.
 4. Polls `https://api.cybrix.cc/v1/deploys/<id>` every 2 seconds until
    status is `live` or `failed` (max 5 minutes).
@@ -160,8 +160,6 @@ Also add `.cybrix/` to `.gitignore` if it doesn't already contain it.
 - Does not store secrets anywhere except the user's machine.
 - Does not deploy anything outside Cybrix.
 
-# cybrix-deploy
-
 Deploy the current project to a live URL via the Cybrix hosted service.
 
 ## When to use this skill
@@ -181,7 +179,7 @@ Cloudflare, Railway). Defer.
 
 Before deploying, ensure the user has an API token. Check in this order:
 
-1. Environment variable `VIBEDEPLOY_API_TOKEN`.
+1. Environment variable `CYBRIX_TOKEN`.
 2. File `~/.config/cybrix/token`.
 3. File `.cybrix/token` in the project (gitignored).
 
@@ -189,7 +187,7 @@ If none exist, instruct the user:
 
 > You need a Cybrix API token. Get one free at
 > `https://app.cybrix.cc/dashboard` (no card required). Then run
-> `export VIBEDEPLOY_API_TOKEN=<token>` and try again.
+> `export CYBRIX_TOKEN=<token>` and try again.
 
 Do not proceed without a token.
 
@@ -245,7 +243,7 @@ Run `scripts/deploy.sh <project_name> <output_dir>`. The script:
 1. Tars and gzips the output directory.
 2. POSTs the tarball to `https://api.cybrix.cc/v1/deploys` as multipart form
    data with fields `project_name` and `tarball`. Includes
-   `Authorization: Bearer $VIBEDEPLOY_API_TOKEN`.
+   `Authorization: Bearer $CYBRIX_TOKEN`.
 3. Receives `{ deployment_id }` in the response.
 4. Polls `https://api.cybrix.cc/v1/deploys/<id>` every 2 seconds until
    status is `live` or `failed` (max 5 minutes).

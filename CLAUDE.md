@@ -63,7 +63,7 @@ the minimum API version in SKILL.md.
 - Premium / paid skills.
 - Skill telemetry (usage is measured server-side only).
 - Skills that don't talk to the Cybrix backend — deferred to later.
-- Env vars beyond `VIBEDEPLOY_API_TOKEN` and `VIBEDEPLOY_API_URL`.
+- Env vars beyond `CYBRIX_TOKEN` and `CYBRIX_API_URL`.
 
 ## ADR-S-0001 — marketplace layout (2026-05-03)
 
@@ -80,8 +80,8 @@ would have prevented `claude plugin install` from working.
 plugins/cybrix-deploy/scripts/test-mock-server.sh 18080
 
 # Terminal 2
-export VIBEDEPLOY_API_TOKEN=fake-token
-export VIBEDEPLOY_API_URL=http://localhost:18080
+export CYBRIX_TOKEN=fake-token
+export CYBRIX_API_URL=http://localhost:18080
 plugins/cybrix-deploy/scripts/deploy.sh myproject test-fixtures/static-site
 ```
 
@@ -89,6 +89,6 @@ Expected: tar → POST → `deployment_id=test-123` → poll pending → poll li
 
 ## Token lookup order (deploy.sh)
 
-1. `$VIBEDEPLOY_API_TOKEN` env var
+1. `$CYBRIX_TOKEN` env var
 2. `~/.config/cybrix/token`
 3. `.cybrix/token` in project root

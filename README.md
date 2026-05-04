@@ -32,7 +32,7 @@ claude plugin install cybrix-deploy@cybrix-skills
 **Step 2.** Add it to your shell (once):
 
 ```bash
-export VIBEDEPLOY_API_TOKEN=vd_your_token_here
+export CYBRIX_TOKEN=vd_your_token_here
 ```
 
 To persist it across sessions, save it to a file instead:
@@ -99,14 +99,14 @@ Full details at [cybrix.cc/pricing](https://cybrix.cc/pricing).
 
 ## Troubleshooting
 
-### Token not found — "VIBEDEPLOY_API_TOKEN is not set"
+### Token not found — "CYBRIX_TOKEN is not set"
 
 The skill looks for your token in three places, in order:
-1. The `VIBEDEPLOY_API_TOKEN` environment variable
+1. The `CYBRIX_TOKEN` environment variable
 2. `~/.config/cybrix/token`
 3. `.cybrix/token` in the project root
 
-If none are found, set it with `export VIBEDEPLOY_API_TOKEN=vd_...` or save
+If none are found, set it with `export CYBRIX_TOKEN=vd_...` or save
 it to `~/.config/cybrix/token` as shown in the install steps above.
 
 ### "Output directory not found"

@@ -12,8 +12,8 @@
 #   scripts/test-mock-server.sh [port]
 #
 # In another terminal:
-#   export VIBEDEPLOY_API_TOKEN=fake-token
-#   export VIBEDEPLOY_API_URL=http://localhost:18080
+#   export CYBRIX_TOKEN=fake-token
+#   export CYBRIX_API_URL=http://localhost:18080
 #   scripts/deploy.sh myproject ./test-fixtures/static-site
 
 set -euo pipefail
