@@ -130,13 +130,13 @@ Also add `.cybrix/` to `.gitignore` if it doesn't already contain it.
 
 ## Errors
 
-| API status | Skill behavior                                             |
-|------------|------------------------------------------------------------|
+| API status | Skill behavior                                                          |
+|------------|-------------------------------------------------------------------------|
 | 401        | Token invalid/revoked. Tell user to refresh at app.cybrix.cc/dashboard. |
-| 402        | Free tier project limit hit. Show upgrade link: cybrix.cc/pricing. |
-| 413        | Tarball >100 MB. Suggest auditing output for large assets. |
-| 429        | Wait 30s, retry once.                                      |
-| 5xx        | Show error, suggest retry, link to app.cybrix.cc/dashboard.|
+| 402        | Free tier project limit hit. Show upgrade link: cybrix.cc/pricing.      |
+| 413        | Tarball >100 MB. Suggest auditing output for large assets.              |
+| 429        | Wait 30s, retry once.                                                   |
+| 5xx        | Show error, suggest retry, link to app.cybrix.cc/dashboard.             |
 
 ## What this skill does NOT do
 
