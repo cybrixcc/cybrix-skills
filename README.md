@@ -54,8 +54,9 @@ claude
 
 > Deploy this with cybrix
 
-Claude will detect the project type, confirm the build command and output
-directory with you, run the build, and deploy. You get back:
+Claude detects the project type, scans for environment variables the build
+needs, confirms everything with you, runs the build, and deploys. You get
+back:
 
 ```
 Deployed.
@@ -68,21 +69,40 @@ Dashboard: https://app.cybrix.cc/projects/abc123
 
 ## Supported project types
 
-Static sites only in this version:
+Static sites only. Claude uses heuristic detection — it looks for signals
+rather than matching against a fixed list of frameworks, so it works with
+any static site generator.
 
-| Framework  | How Cybrix detects it                                          |
-|------------|----------------------------------------------------------------|
-| Next.js    | `"next"` in package.json + `output: 'export'` in next.config   |
-| Astro      | `"astro"` in package.json                                      |
-| Vite       | `"vite"` in package.json                                       |
-| Hugo       | `hugo` binary in PATH                                          |
-| Eleventy   | `"@11ty/eleventy"` in package.json                             |
-| Plain HTML | `index.html` at the project root                               |
+**Detected as static** (deploys automatically): Next.js with
+`output: 'export'`, Astro, Vite, Hugo, Eleventy, Jekyll, Zola, plain HTML
+directories, and anything else that produces a static output folder.
+
+**Detected as server** (refused with explanation): projects with a
+`Dockerfile`, Go/Python/Rust/Ruby/Java/C# server entry points, or a
+`package.json` `start` script that runs a Node server. Claude names the
+specific signal it found and suggests alternatives.
+
+**Not sure?** You can always tell Claude to deploy anyway — the detection
+is a heuristic, not a hard gate.
 
 Output directories checked in order: `dist`, `out`, `public`, `_site`, `build`, `.output/public`.
 
-If your project needs a server runtime (Next.js without static export, Express,
-FastAPI, etc.) Claude will tell you — server-side deploys are coming soon.
+## Environment variables
+
+Before running the build, Claude scans your project for environment
+variables the build will need:
+
+- Reads `.env`, `.env.local`, `.env.production`, `.env.example`
+- Greps source files for `process.env.X` and `import.meta.env.X` references
+- Shows you what it found and asks how to handle it:
+  - **Paste here** — values are sent encrypted with the deploy
+  - **Set later** — configure in the Cybrix dashboard after deploy
+  - **Skip** — build may fail or the site may not work correctly
+
+Claude warns you if a variable is used in code but missing from your `.env`
+files, and refuses to forward anything that looks like a private secret
+(`*_SECRET`, `*_PRIVATE_KEY`, `DATABASE_URL`) inside a client-bundle prefix
+(`NEXT_PUBLIC_*`, `VITE_*`, etc.) without your explicit confirmation.
 
 ---
 
