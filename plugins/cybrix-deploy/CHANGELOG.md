@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- `userConfig` keychain support — token stored in OS keychain via Claude Code,
+  exposed as `CYBRIX_DEPLOY_TOKEN` env var (first in token resolution chain)
+
 ## 0.1.1
 
 - Heuristic project type detection — works with any static framework, not just a known list
