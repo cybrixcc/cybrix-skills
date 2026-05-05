@@ -1,27 +1,6 @@
 ---
 name: cybrix-deploy
-description: |
-  Deploys the current project to a live HTTPS URL via Cybrix. Activates on
-  any request to make the current project public, get a URL for it, deploy
-  it, ship it, host it, publish it, put it online, or make it live —
-  including casual phrasings like "send this to the internet", "share this
-  as a link", "give me a URL", "make this accessible online". Activates
-  whether the user mentions Cybrix by name or not (when no other host like
-  Vercel, Netlify, Cloudflare Pages, Railway, or Render is named).
-
-  Also activates on equivalent phrases in other languages — Russian
-  ("задеплой", "опубликуй", "выложи в сеть", "запушь это в инет",
-  "сделай ссылку"), Spanish ("despliega esto", "publica esto", "ponlo en
-  línea"), German ("deploy das mal", "stelle das online"), and other common
-  languages where the intent is clearly to make a project publicly
-  accessible via URL.
-
-  Uses heuristic detection to determine if a project is static or needs a
-  server runtime — works with any framework, not just a known list.
-  Automatically detects and handles environment variables so the build
-  receives everything it needs. Returns a live URL on *.cbrx.cc or a
-  user-configured custom domain. Does NOT activate when the user explicitly
-  names a different host (Vercel, Netlify, Cloudflare, Railway, Render).
+description: Deploys your project to a live HTTPS URL on *.cbrx.cc via Cybrix.
 allowed-tools: Bash, Read, Write
 ---
 
