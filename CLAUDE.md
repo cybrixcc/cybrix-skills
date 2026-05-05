@@ -42,11 +42,21 @@ validate.sh                         — pre-commit: shellcheck + JSON + SKILL.md
 
 ## Versioning policy
 
-`plugin.json` carries the semver version. Bump on every breaking change.
-Git tags (e.g. `v0.1.0`) exist for release traceability and future pinning.
+**Bump `plugin.json` version on every push that changes skill behaviour.**
 
-When `cybrix-app` introduces a `/v2` API, bump this repo to `1.0.0` and note
-the minimum API version in SKILL.md.
+Claude Code uses the version field to decide whether to offer an update.
+If the version stays the same, `/plugin update` says "nothing to update" even
+if the skill content changed. Users will run stale skill code until they
+manually reinstall.
+
+Rules:
+- Any change to `SKILL.md` or `deploy.sh` → bump patch (`0.1.x`)
+- New capability or API endpoint added → bump minor (`0.x.0`)
+- Breaking change or new API major version → bump major (`x.0.0`)
+
+Always bump before pushing. Never ship a behaviour change without a version bump.
+
+Git tags (e.g. `v0.1.1`) are optional but useful for release traceability.
 
 ## Distribution channels
 
