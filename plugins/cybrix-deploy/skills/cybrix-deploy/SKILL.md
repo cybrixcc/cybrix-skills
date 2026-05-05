@@ -35,13 +35,19 @@ Before deploying, ensure the user has an API token. Check in this order:
 2. File `~/.config/cybrix/token`.
 3. File `.cybrix/token` in the project (gitignored).
 
-If none exist, instruct the user:
+If none exist, instruct the user exactly like this:
 
-> You need a Cybrix API token. Get one free at
-> `https://app.cybrix.cc/dashboard` (no card required). Then run
-> `export CYBRIX_TOKEN=<token>` and try again.
+> No Cybrix token found. Get one free at **https://app.cybrix.cc/dashboard**
+> (Step 3 — "Save your API token" → Generate).
+>
+> Once you have it, you can either:
+> - **Paste it here** and I'll use it for this deploy (easiest)
+> - Run `export CYBRIX_TOKEN=<token>` in your terminal to set it for this session
+> - Run `echo <token> > ~/.config/cybrix/token` to save it permanently
 
-Do not proceed without a token.
+Then wait for the user to provide the token. If they paste it directly in
+chat, use it immediately — do not require them to re-run any command.
+The project is ready to deploy once the token is available.
 
 ## Deployment workflow
 
