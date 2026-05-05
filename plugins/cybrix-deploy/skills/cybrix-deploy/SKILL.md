@@ -164,20 +164,36 @@ looks like a secret (`*_SECRET`, `*_PRIVATE_KEY`, `DATABASE_URL`,
 
 Do not send it without explicit confirmation.
 
-### Step 3 — Confirm with the user
+### Step 3 — Choose project name and confirm
 
-Present a short summary:
+**3a. Infer a default name** from the current folder name, slugified
+(lowercase, hyphens, max 32 chars). Example: `my-portfolio-site`.
 
-> I will deploy this project to Cybrix.
+**3b. Check availability** by calling:
+```
+GET https://api.cybrix.cc/v1/slugs/<name>/available
+```
+Response: `{"available": true, "slug": "my-portfolio-site"}`
+
+- If `available: true` — use it as the default.
+- If `available: false` — do NOT use it. Tell the user:
+  > The name `<name>` is already taken. What would you like to call
+  > your project? It will be live at `<your-name>.cbrx.cc`.
+  Then check availability of the new name too. Repeat until available.
+
+**3c. Present summary** (only after confirming name is available):
+
+> Ready to deploy to Cybrix:
 >
-> - Project name: <inferred-from-folder>
-> - Build command: <detected, e.g. npm run build>
-> - Output directory: <detected, e.g. out>
-> - Env vars: <count> variables included / none detected
+> - Project name: **<name>** → live at `<name>.cbrx.cc`
+> - Build command: <detected>
+> - Output directory: <detected>
+> - Env vars: <count> included / none detected
 >
 > Continue? (yes / change name / change build / change output)
 
-Use the answers to override defaults.
+If the user says `change name`, ask for a new name and re-check availability.
+Use the confirmed answers to override defaults before proceeding.
 
 ### Step 4 — Build
 
