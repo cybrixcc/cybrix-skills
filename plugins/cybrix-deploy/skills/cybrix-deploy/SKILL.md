@@ -205,9 +205,6 @@ On success:
 >
 > Live: https://<slug>.cbrx.cc
 > Dashboard: https://app.cybrix.cc/dashboard/projects/<project_id>
->
-> First time? Connect Telegram to receive deploy alerts:
-> https://app.cybrix.cc/telegram
 
 On failure:
 
