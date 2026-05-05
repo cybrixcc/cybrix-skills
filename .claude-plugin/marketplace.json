@@ -10,7 +10,7 @@
       "name": "cybrix-deploy",
       "source": "./plugins/cybrix-deploy",
       "description": "Deploy the current static site to a live HTTPS URL via Cybrix. Detects Next.js export, Astro, Vite, Hugo, Eleventy, and plain HTML. Returns a live URL on *.cbrx.cc in under 60 seconds.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "CYBRIX LLC",
         "email": "support@cybrix.cc"

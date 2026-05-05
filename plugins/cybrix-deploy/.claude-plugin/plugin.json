@@ -4,9 +4,19 @@
   "description": "Deploy the current static site to a live HTTPS URL via Cybrix. Detects Next.js export, Astro, Vite, Hugo, Eleventy, and plain HTML. Returns a live URL on *.cbrx.cc in under 60 seconds.",
   "author": {
     "name": "CYBRIX LLC",
-    "email": "support@cybrix.cc"
+    "email": "support@cybrix.cc",
+    "url": "https://cybrix.cc"
   },
   "homepage": "https://cybrix.cc",
   "repository": "https://github.com/cybrixcc/cybrix-skills",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": ["deploy", "hosting", "static-site", "devops", "cybrix"],
+  "userConfig": {
+    "token": {
+      "type": "string",
+      "title": "Cybrix API Token",
+      "description": "Your Cybrix API token from app.cybrix.cc/dashboard. Stored securely in your system keychain.",
+      "sensitive": true
+    }
+  }
 }
