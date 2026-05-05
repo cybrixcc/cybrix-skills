@@ -31,9 +31,10 @@ allowed-tools: Bash, Read, Write
 
 Before deploying, ensure the user has an API token. Check in this order:
 
-1. Environment variable `CYBRIX_TOKEN`.
-2. File `~/.config/cybrix/token`.
-3. File `.cybrix/token` in the project (gitignored).
+1. `CYBRIX_DEPLOY_TOKEN` — set automatically by Claude Code from userConfig keychain (no action needed).
+2. Environment variable `CYBRIX_TOKEN`.
+3. File `~/.config/cybrix/token`.
+4. File `.cybrix/token` in the project (gitignored).
 
 If none exist, instruct the user exactly like this:
 

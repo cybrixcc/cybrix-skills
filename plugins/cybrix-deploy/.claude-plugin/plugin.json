@@ -1,6 +1,6 @@
 {
   "name": "cybrix-deploy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Deploy the current static site to a live HTTPS URL via Cybrix. Detects Next.js export, Astro, Vite, Hugo, Eleventy, and plain HTML. Returns a live URL on *.cbrx.cc in under 60 seconds.",
   "author": {
     "name": "CYBRIX LLC",

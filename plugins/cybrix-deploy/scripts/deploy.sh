@@ -44,9 +44,13 @@ PROJECT_NAME="${1:?usage: deploy.sh <project_name> <output_dir>}"
 OUTPUT_DIR="${2:?usage: deploy.sh <project_name> <output_dir>}"
 
 # ── token resolution ─────────────────────────────────────────────────────────
+# Priority: userConfig keychain (via Claude Code) > CYBRIX_TOKEN env > file
 
 if [[ -z "${CYBRIX_TOKEN:-}" ]]; then
-  if [[ -r "${HOME}/.config/cybrix/token" ]]; then
+  # Claude Code userConfig: exposed as CYBRIX_DEPLOY_TOKEN when sensitive:true
+  if [[ -n "${CYBRIX_DEPLOY_TOKEN:-}" ]]; then
+    CYBRIX_TOKEN="$CYBRIX_DEPLOY_TOKEN"
+  elif [[ -r "${HOME}/.config/cybrix/token" ]]; then
     CYBRIX_TOKEN="$(cat "${HOME}/.config/cybrix/token")"
   elif [[ -r ".cybrix/token" ]]; then
     CYBRIX_TOKEN="$(cat ".cybrix/token")"
