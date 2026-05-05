@@ -54,9 +54,18 @@ Rules:
 - New capability or API endpoint added → bump minor (`0.x.0`)
 - Breaking change or new API major version → bump major (`x.0.0`)
 
+**Every version bump requires three files to change together:**
+
+1. `plugins/cybrix-deploy/.claude-plugin/plugin.json` — the version field
+2. `.claude-plugin/marketplace.json` — `plugins[0].version` must match plugin.json
+3. `plugins/cybrix-deploy/CHANGELOG.md` — add an entry describing what changed
+
+If only plugin.json is bumped, `claude plugin validate .` will warn about the
+mismatch and users installing from the marketplace will get the wrong version.
+
 Always bump before pushing. Never ship a behaviour change without a version bump.
 
-Git tags (e.g. `v0.1.1`) are optional but useful for release traceability.
+Git tags (e.g. `v0.1.2`) are optional but useful for release traceability.
 
 ## Distribution channels
 
