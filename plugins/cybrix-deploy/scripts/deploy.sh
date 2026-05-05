@@ -18,7 +18,15 @@ set -euo pipefail
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
-die() { echo "[cybrix] error: $*" >&2; exit 1; }
+die() {
+  echo "[cybrix] error: $*" >&2
+  # Anonymous error report — no token, no code, no PII
+  curl -sf -X POST "${API_URL:-https://api.cybrix.cc}/v1/skill-errors" \
+    -H "Content-Type: application/json" \
+    -d "{\"step\":\"${CURRENT_STEP:-unknown}\",\"error_code\":\"${LAST_HTTP_CODE:-0}\",\"http_status\":${LAST_HTTP_CODE:-0},\"os\":\"$(uname -s)\",\"version\":\"0.1.0\"}" \
+    --max-time 3 > /dev/null 2>&1 || true
+  exit 1
+}
 
 json_field() {
   # Extract a JSON string field value without requiring jq.
@@ -65,7 +73,11 @@ command -v tar  >/dev/null 2>&1 || die "tar is required but not found"
 PROJECT_ID="${CYBRIX_PROJECT_ID:-}"
 PROJECT_SLUG=""
 
+CURRENT_STEP="init"
+LAST_HTTP_CODE=0
+
 if [[ -z "$PROJECT_ID" ]]; then
+  CURRENT_STEP="project_creation"
   echo "[cybrix] creating project: $PROJECT_NAME"
   PROJ_RESPONSE="$(
     curl -sS --fail-with-body \
@@ -78,6 +90,7 @@ if [[ -z "$PROJECT_ID" ]]; then
 
   PROJ_HTTP_CODE="${PROJ_RESPONSE##*$'\n'__HTTP_CODE__:}"
   PROJ_BODY="${PROJ_RESPONSE%$'\n'__HTTP_CODE__:*}"
+  LAST_HTTP_CODE="$PROJ_HTTP_CODE"
 
   case "$PROJ_HTTP_CODE" in
     200|201)
@@ -113,6 +126,7 @@ fi
 
 # ── upload ───────────────────────────────────────────────────────────────────
 
+CURRENT_STEP="upload"
 echo "[cybrix] uploading to $API_URL"
 HTTP_RESPONSE="$(
   curl -sS --fail-with-body \
@@ -125,6 +139,7 @@ HTTP_RESPONSE="$(
 
 HTTP_CODE="${HTTP_RESPONSE##*$'\n'__HTTP_CODE__:}"
 RESPONSE_BODY="${HTTP_RESPONSE%$'\n'__HTTP_CODE__:*}"
+LAST_HTTP_CODE="$HTTP_CODE"
 
 case "$HTTP_CODE" in
   200|201|202) ;;
@@ -164,6 +179,7 @@ echo "[cybrix] deployment_id=$DEPLOYMENT_ID"
 
 # ── poll ─────────────────────────────────────────────────────────────────────
 
+CURRENT_STEP="polling"
 echo "[cybrix] waiting for deployment to go live..."
 
 DEADLINE=$(( $(date +%s) + 300 ))
