@@ -12,12 +12,23 @@
 #
 # Optional:
 #   CYBRIX_API_URL     defaults to https://api.cybrix.cc
+#   CYBRIX_PROJECT_ID  skip project creation, deploy to existing project
 
 set -euo pipefail
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
 die() { echo "[cybrix] error: $*" >&2; exit 1; }
+
+json_field() {
+  # Extract a JSON string field value without requiring jq.
+  local json="$1" field="$2"
+  printf '%s' "$json" \
+    | grep -o "\"${field}\" *: *\"[^\"]*\"" \
+    | grep -o '"[^"]*"$' \
+    | tr -d '"' \
+    || true
+}
 
 # ── args ─────────────────────────────────────────────────────────────────────
 
@@ -49,6 +60,39 @@ API_URL="${CYBRIX_API_URL:-https://api.cybrix.cc}"
 command -v curl >/dev/null 2>&1 || die "curl is required but not found"
 command -v tar  >/dev/null 2>&1 || die "tar is required but not found"
 
+# ── resolve project ID ───────────────────────────────────────────────────────
+
+PROJECT_ID="${CYBRIX_PROJECT_ID:-}"
+PROJECT_SLUG=""
+
+if [[ -z "$PROJECT_ID" ]]; then
+  echo "[cybrix] creating project: $PROJECT_NAME"
+  PROJ_RESPONSE="$(
+    curl -sS --fail-with-body \
+      -w '\n__HTTP_CODE__:%{http_code}' \
+      -X POST "$API_URL/v1/projects" \
+      -H "Authorization: Bearer $CYBRIX_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d "{\"name\": \"$PROJECT_NAME\"}"
+  )" || true
+
+  PROJ_HTTP_CODE="${PROJ_RESPONSE##*$'\n'__HTTP_CODE__:}"
+  PROJ_BODY="${PROJ_RESPONSE%$'\n'__HTTP_CODE__:*}"
+
+  case "$PROJ_HTTP_CODE" in
+    200|201)
+      PROJECT_ID="$(json_field "$PROJ_BODY" "id")"
+      PROJECT_SLUG="$(json_field "$PROJ_BODY" "slug")"
+      [[ -n "$PROJECT_ID" ]] || die "project creation response missing id. Response: $PROJ_BODY"
+      echo "[cybrix] project created: id=$PROJECT_ID slug=$PROJECT_SLUG"
+      ;;
+    401) die "authentication failed (401). Refresh your token at https://app.cybrix.cc/dashboard" ;;
+    403) die "free tier project limit reached (403). Upgrade at https://cybrix.cc/pricing" ;;
+    409) die "project name already taken (409). Choose a different name." ;;
+    *)   die "project creation failed (HTTP $PROJ_HTTP_CODE): $PROJ_BODY" ;;
+  esac
+fi
+
 # ── package ──────────────────────────────────────────────────────────────────
 
 TMP_DIR="$(mktemp -d)"
@@ -60,11 +104,12 @@ echo "[cybrix] packing $OUTPUT_DIR"
 tar -czf "$TARBALL" -C "$OUTPUT_DIR" .
 
 SIZE_BYTES="$(wc -c < "$TARBALL" | tr -d ' ')"
+echo "[cybrix] bundle size: $SIZE_BYTES bytes"
+
 SIZE_MB=$(( SIZE_BYTES / 1024 / 1024 ))
 if (( SIZE_MB > 100 )); then
   die "bundle too large: ${SIZE_MB} MB (limit 100 MB). Audit your output directory for large assets."
 fi
-echo "[cybrix] bundle: ${SIZE_MB} MB"
 
 # ── upload ───────────────────────────────────────────────────────────────────
 
@@ -74,8 +119,8 @@ HTTP_RESPONSE="$(
     -w '\n__HTTP_CODE__:%{http_code}' \
     -X POST "$API_URL/v1/deploys" \
     -H "Authorization: Bearer $CYBRIX_TOKEN" \
-    -F "project_name=$PROJECT_NAME" \
-    -F "tarball=@$TARBALL"
+    -F "project_id=$PROJECT_ID" \
+    -F "file=@$TARBALL"
 )" || true
 
 HTTP_CODE="${HTTP_RESPONSE##*$'\n'__HTTP_CODE__:}"
@@ -84,7 +129,7 @@ RESPONSE_BODY="${HTTP_RESPONSE%$'\n'__HTTP_CODE__:*}"
 case "$HTTP_CODE" in
   200|201|202) ;;
   401) die "authentication failed (401). Refresh your token at https://app.cybrix.cc/dashboard" ;;
-  402) die "free tier project limit reached (402). Upgrade at https://cybrix.cc/pricing" ;;
+  402|403) die "free tier deploy limit reached. Upgrade at https://cybrix.cc/pricing" ;;
   413) die "bundle too large (413). Audit your output directory for large assets." ;;
   429)
     echo "[cybrix] rate limited (429). Waiting 30s before retry..." >&2
@@ -94,30 +139,26 @@ case "$HTTP_CODE" in
         -w '\n__HTTP_CODE__:%{http_code}' \
         -X POST "$API_URL/v1/deploys" \
         -H "Authorization: Bearer $CYBRIX_TOKEN" \
-        -F "project_name=$PROJECT_NAME" \
-        -F "tarball=@$TARBALL"
+        -F "project_id=$PROJECT_ID" \
+        -F "file=@$TARBALL"
     )" || true
     HTTP_CODE="${HTTP_RESPONSE##*$'\n'__HTTP_CODE__:}"
     RESPONSE_BODY="${HTTP_RESPONSE%$'\n'__HTTP_CODE__:*}"
     [[ "$HTTP_CODE" == "200" || "$HTTP_CODE" == "201" || "$HTTP_CODE" == "202" ]] \
       || die "upload failed after retry (HTTP $HTTP_CODE): $RESPONSE_BODY"
     ;;
-  5*) die "API returned a server error (HTTP $HTTP_CODE). Wait a moment and try again, or check https://app.cybrix.cc/dashboard for status. Response: $RESPONSE_BODY" ;;
+  5*) die "API returned a server error (HTTP $HTTP_CODE): $RESPONSE_BODY" ;;
   *)  die "unexpected response (HTTP $HTTP_CODE): $RESPONSE_BODY" ;;
 esac
 
 # ── extract deployment id ─────────────────────────────────────────────────────
 
-# grep+cut avoids a jq dependency while remaining portable.
-# The [^"]* pattern tolerates optional spaces around the colon (": " or ":").
-DEPLOYMENT_ID="$(printf '%s' "$RESPONSE_BODY" \
-  | grep -o '"deployment_id" *: *"[^"]*"' \
-  | grep -o '"[^"]*"$' \
-  | tr -d '"' \
-  || true)"
-
+DEPLOYMENT_ID="$(json_field "$RESPONSE_BODY" "id")"
 [[ -n "$DEPLOYMENT_ID" ]] \
-  || die "API response missing deployment_id. Response was: $RESPONSE_BODY"
+  || die "API response missing id. Response was: $RESPONSE_BODY"
+
+# Extract slug and project_id from deploy response if not already set
+[[ -n "$PROJECT_ID" ]] || PROJECT_ID="$(json_field "$RESPONSE_BODY" "project_id")"
 
 echo "[cybrix] deployment_id=$DEPLOYMENT_ID"
 
@@ -128,27 +169,26 @@ echo "[cybrix] waiting for deployment to go live..."
 DEADLINE=$(( $(date +%s) + 300 ))
 
 while true; do
-  (( $(date +%s) <= DEADLINE )) || die "timed out after 5 minutes. Check logs at https://app.cybrix.cc/deployments/$DEPLOYMENT_ID"
+  (( $(date +%s) <= DEADLINE )) || die "timed out after 5 minutes."
 
   STATUS_RESPONSE="$(
     curl -sS "$API_URL/v1/deploys/$DEPLOYMENT_ID" \
       -H "Authorization: Bearer $CYBRIX_TOKEN"
   )"
 
-  STATUS="$(printf '%s' "$STATUS_RESPONSE" \
-    | grep -o '"status" *: *"[^"]*"' \
-    | grep -o '"[^"]*"$' \
-    | tr -d '"' \
-    || true)"
+  STATUS="$(json_field "$STATUS_RESPONSE" "status")"
+  DEPLOYED_URL="$(json_field "$STATUS_RESPONSE" "deployed_url")"
 
   case "$STATUS" in
     live)
-      echo "$STATUS_RESPONSE"
+      # Emit final JSON for the skill to parse
+      printf '{"id":"%s","project_id":"%s","status":"live","deployed_url":"%s","slug":"%s"}\n' \
+        "$DEPLOYMENT_ID" "$PROJECT_ID" "$DEPLOYED_URL" "$PROJECT_SLUG"
       exit 0
       ;;
     failed)
       printf '%s\n' "$STATUS_RESPONSE" >&2
-      die "deployment failed. Logs: https://app.cybrix.cc/deployments/$DEPLOYMENT_ID"
+      die "deployment failed."
       ;;
     pending|building|"")
       sleep 2

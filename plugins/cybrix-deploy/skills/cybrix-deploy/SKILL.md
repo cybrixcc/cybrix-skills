@@ -186,14 +186,16 @@ If the build fails, do not retry. Show the last 40 lines and say:
 Run `${CLAUDE_PLUGIN_ROOT}/scripts/deploy.sh <project_name> <output_dir>`.
 The script:
 
-1. Tars and gzips the output directory.
-2. POSTs the tarball to `https://api.cybrix.cc/v1/deploys` as multipart
-   form data with fields `project_name`, `tarball`, and optionally
-   `env_vars` (JSON map). Includes `Authorization: Bearer $CYBRIX_TOKEN`.
-3. Receives `{ deployment_id }` in the response.
-4. Polls `https://api.cybrix.cc/v1/deploys/<id>` every 2 seconds until
+1. Creates a project via `POST /v1/projects` with `{"name": "<project_name>"}`,
+   receives `{ id, slug }`. Skips if `CYBRIX_PROJECT_ID` is already set.
+2. Tars and gzips the output directory.
+3. POSTs the tarball to `https://api.cybrix.cc/v1/deploys` as multipart
+   form data with fields `project_id` (UUID) and `file` (the .tar.gz),
+   optionally `env_vars` (JSON map). Includes `Authorization: Bearer $CYBRIX_TOKEN`.
+4. Receives `{ id, project_id, status }` in the response.
+5. Polls `https://api.cybrix.cc/v1/deploys/<id>` every 2 seconds until
    status is `live` or `failed` (max 5 minutes).
-5. Prints the result as JSON on stdout.
+6. Prints the result as JSON on stdout including `deployed_url` and `slug`.
 
 ### Step 6 — Report to the user
 
@@ -202,7 +204,7 @@ On success:
 > Deployed.
 >
 > Live: https://<slug>.cbrx.cc
-> Dashboard: https://app.cybrix.cc/projects/<id>
+> Dashboard: https://app.cybrix.cc/dashboard/projects/<project_id>
 >
 > First time? Connect Telegram to receive deploy alerts:
 > https://app.cybrix.cc/telegram
