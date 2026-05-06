@@ -66,6 +66,21 @@ mismatch and users installing from the marketplace will get the wrong version.
 Always bump before pushing. Never ship a behaviour change without a version bump.
 
 Git tags (e.g. `v0.1.2`) are optional but useful for release traceability.
+Create a tag manually after pushing a version bump — never automate tags on every push.
+
+## CHANGELOG rules
+
+`plugins/cybrix-deploy/CHANGELOG.md` is the user-facing release log. Every AI agent
+working in this repo must follow these rules:
+
+- **Version bump commit** (SKILL.md or deploy.sh changed) → add a new `## x.y.z` entry
+  to CHANGELOG.md describing what changed in plain English. This is mandatory — it is
+  one of the three files that must change together.
+- **Docs/chore commit** (README, CLAUDE.md, scripts/README, etc.) → do NOT add a
+  CHANGELOG entry. These changes are invisible to end users of the skill.
+- Never edit existing CHANGELOG entries. Append only.
+- Write entries from the user's perspective: what the skill does differently, not what
+  files changed.
 
 ## Distribution channels
 
