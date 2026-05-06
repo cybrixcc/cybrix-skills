@@ -107,9 +107,9 @@ The skill looks for your token in this order:
 
 ## Pricing
 
-| Plan        | Projects | Domain        | History  |
-|-------------|----------|---------------|----------|
-| Free        | 1        | `*.cbrx.cc`   | 7 days   |
+| Plan        | Projects | Domain        | Deploy history     |
+|-------------|----------|---------------|--------------------|
+| Free        | 1        | `*.cbrx.cc`   | 7 days             |
 | Pro — $9/mo | 10       | Custom domain | 90 days + rollback |
 
 Pro also includes Telegram deploy alerts.
