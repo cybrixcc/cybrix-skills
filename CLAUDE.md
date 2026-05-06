@@ -65,8 +65,23 @@ mismatch and users installing from the marketplace will get the wrong version.
 
 Always bump before pushing. Never ship a behaviour change without a version bump.
 
-Git tags (e.g. `v0.1.2`) are optional but useful for release traceability.
-Create a tag manually after pushing a version bump — never automate tags on every push.
+## Version bump procedure (follow exactly, in order)
+
+1. Edit `plugins/cybrix-deploy/.claude-plugin/plugin.json` — bump `version`
+2. Edit `.claude-plugin/marketplace.json` — bump `plugins[0].version` to match
+3. Edit `plugins/cybrix-deploy/CHANGELOG.md` — prepend a new `## x.y.z` entry
+4. Commit all three files together:
+   `git add plugins/cybrix-deploy/.claude-plugin/plugin.json .claude-plugin/marketplace.json plugins/cybrix-deploy/CHANGELOG.md`
+   `git commit -m "chore: bump x.y.z — <one-line summary>"`
+5. Push: `git push origin master`
+6. Create an annotated tag: `git tag -a vX.Y.Z -m "vX.Y.Z — <same one-line summary>"`
+7. Push the tag: `git push origin vX.Y.Z`
+8. Create a GitHub Release from the tag:
+   `gh release create vX.Y.Z --title "vX.Y.Z" --notes "$(sed -n '/^## X.Y.Z/,/^## /p' plugins/cybrix-deploy/CHANGELOG.md | head -n -1)"`
+   (Replace X.Y.Z with the actual version number)
+
+This ensures the tag has release notes on GitHub and users see what changed.
+Never create a tag without a corresponding GitHub Release — bare tags have no changelog visible on GitHub.
 
 ## CHANGELOG rules
 
