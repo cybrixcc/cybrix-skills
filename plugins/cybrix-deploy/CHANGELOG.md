@@ -5,6 +5,10 @@ Format: version, date, changes. Most recent first.
 
 ---
 
+## 0.1.3 — 2026-05-06
+
+- CHANGELOG updated with accurate history for all versions
+
 ## 0.1.2 — 2026-05-06
 
 - `userConfig` keychain support — token stored in OS keychain via Claude Code plugin system,
