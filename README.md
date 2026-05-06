@@ -1,171 +1,164 @@
 # Cybrix — deploy from Claude Code
 
-Cybrix is a hosting service for static sites. This repo adds a
-**cybrix-deploy** skill to [Claude Code](https://claude.ai/code) so you can
-deploy by saying **"deploy this with cybrix"** in the chat — Claude runs the
-build, packages the output, uploads it, and hands you a live HTTPS URL in
-under 60 seconds.
+[![Version](https://img.shields.io/badge/version-0.1.2-orange)](https://github.com/cybrixcc/cybrix-skills/blob/master/plugins/cybrix-deploy/.claude-plugin/plugin.json)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-7c3aed)](https://claude.ai/code)
+[![Free tier](https://img.shields.io/badge/free%20tier-no%20credit%20card-22c55e)](https://cybrix.cc)
 
-No config files. No CI setup. Just talk to Claude.
+**Tell Claude to deploy. Get a live HTTPS URL in under 60 seconds.**
 
----
+Cybrix is a hosting service for static sites. This plugin adds a `cybrix-deploy` skill to [Claude Code](https://claude.ai/code) — Claude runs the build, packages the output, uploads it to Cloudflare's edge network, and hands you a live URL directly in the chat.
 
-## Prerequisites
+No config files. No CI setup. No dashboards. Just talk.
 
-- [Claude Code](https://claude.ai/code) installed (`npm install -g @anthropic-ai/claude-code`)
-- A Cybrix account — free at [cybrix.cc](https://cybrix.cc), no credit card required
+```
+> Deploy this with cybrix
 
----
+✓ Detected static site (Next.js export)
+✓ Building... done in 8s
+✓ Uploading to Cybrix... done
+✓ Live at: https://my-site.cbrx.cc
 
-## Install the skill
-
-```bash
-claude plugin marketplace add cybrixcc/cybrix-skills
-claude plugin install cybrix-deploy@cybrix-skills
+  Your site is live. Connect a custom domain in dashboard.
 ```
 
 ---
 
-## First deploy
+## Quick start
 
-**Step 1.** Get your API token from [app.cybrix.cc/dashboard](https://app.cybrix.cc/dashboard).
+**1. Install the skill** — run inside Claude Code:
 
-**Step 2.** Add it to your shell (once):
+```
+/plugin marketplace add cybrixcc/cybrix-skills
+/plugin install cybrix-deploy@cybrix-skills
+```
+
+**2. Get a free API token** at [app.cybrix.cc](https://app.cybrix.cc) — no credit card required.
+
+**3. Set your token:**
 
 ```bash
 export CYBRIX_TOKEN=vd_your_token_here
 ```
 
-To persist it across sessions, save it to a file instead:
+To persist across sessions:
 
 ```bash
-mkdir -p ~/.config/cybrix
-echo "vd_your_token_here" > ~/.config/cybrix/token
+mkdir -p ~/.config/cybrix && echo "vd_your_token_here" > ~/.config/cybrix/token
 ```
 
-**Step 3.** Go to your project directory and open Claude Code:
-
-```bash
-cd my-project
-claude
-```
-
-**Step 4.** Say:
-
-> Deploy this with cybrix
-
-Claude detects the project type, scans for environment variables the build
-needs, confirms everything with you, runs the build, and deploys. You get
-back:
+**4. Open Claude Code in your project and say:**
 
 ```
-Deployed.
-
-Live:      https://my-project-abc123.cbrx.cc
-Dashboard: https://app.cybrix.cc/projects/abc123
+Deploy this with cybrix
 ```
+
+---
+
+## What Claude does
+
+1. Detects your project type (Next.js, Astro, Vite, Hugo, Eleventy, plain HTML, and more)
+2. Scans for environment variables your build needs — asks how to handle each one
+3. Runs the build and locates the output directory
+4. Uploads to Cybrix and polls until the site is live
+5. Returns the live URL directly in the chat
+
+Works in any language — *"deploy this"*, *"задеплой это"*, *"despliega esto"* — Claude understands the intent.
 
 ---
 
 ## Supported project types
 
-Static sites only. Claude uses heuristic detection — it looks for signals
-rather than matching against a fixed list of frameworks, so it works with
-any static site generator.
+Static sites only. Detection is heuristic — works with any framework that produces a static output folder.
 
-**Detected as static** (deploys automatically): Next.js with
-`output: 'export'`, Astro, Vite, Hugo, Eleventy, Jekyll, Zola, plain HTML
-directories, and anything else that produces a static output folder.
-
-**Detected as server** (refused with explanation): projects with a
-`Dockerfile`, Go/Python/Rust/Ruby/Java/C# server entry points, or a
-`package.json` `start` script that runs a Node server. Claude names the
-specific signal it found and suggests alternatives.
-
-**Not sure?** You can always tell Claude to deploy anyway — the detection
-is a heuristic, not a hard gate.
+| Result   | Examples                                                                            |
+|----------|-------------------------------------------------------------------------------------|
+| [deploy] | Next.js (`output: 'export'`), Astro, Vite, Hugo, Eleventy, Jekyll, Zola, plain HTML |
+| [skip]   | Dockerfile present, Node/Go/Python/Ruby server entry points                         |
 
 Output directories checked in order: `dist`, `out`, `public`, `_site`, `build`, `.output/public`.
 
+---
+
 ## Environment variables
 
-Before running the build, Claude scans your project for environment
-variables the build will need:
+Before running the build, Claude scans your project for environment variables the build will need:
 
 - Reads `.env`, `.env.local`, `.env.production`, `.env.example`
 - Greps source files for `process.env.X` and `import.meta.env.X` references
-- Shows you what it found and asks how to handle it:
-  - **Paste here** — values are sent encrypted with the deploy
+- Shows you what it found and asks how to handle each:
+  - **Paste here** — sent encrypted with the deploy
   - **Set later** — configure in the Cybrix dashboard after deploy
   - **Skip** — build may fail or the site may not work correctly
 
-Claude warns you if a variable is used in code but missing from your `.env`
-files, and refuses to forward anything that looks like a private secret
-(`*_SECRET`, `*_PRIVATE_KEY`, `DATABASE_URL`) inside a client-bundle prefix
-(`NEXT_PUBLIC_*`, `VITE_*`, etc.) without your explicit confirmation.
+Claude warns if a variable is used in code but missing from your env files, and refuses to forward anything that looks like a private secret (`*_SECRET`, `*_PRIVATE_KEY`, `DATABASE_URL`) inside a client-bundle prefix (`NEXT_PUBLIC_*`, `VITE_*`) without your explicit confirmation.
+
+---
+
+## Token lookup order
+
+The skill looks for your token in this order:
+
+1. `$CYBRIX_TOKEN` environment variable
+2. `~/.config/cybrix/token`
+3. `.cybrix/token` in the project root
 
 ---
 
 ## Pricing
 
-| Plan            | Projects | Domain        | Deploys/month |
-|-----------------|----------|---------------|---------------|
-| **Free**        | 1        | `*.cbrx.cc`   | 50            |
-| **Pro — $9/mo** | 10       | Custom domain | Unlimited     |
+| Plan            | Projects | Domain          | Deploys/month |
+|-----------------|----------|-----------------|---------------|
+| Free            | 1        | `*.cbrx.cc`     | 50            |
+| Pro — $9/mo     | 10       | Custom domain   | Unlimited     |
 
-Pro also includes password protection and Telegram deploy alerts.
-Full details at [cybrix.cc/pricing](https://cybrix.cc/pricing).
+Pro includes custom domains, password protection, and Telegram deploy alerts.
+→ [cybrix.cc/pricing](https://cybrix.cc/pricing)
 
 ---
 
 ## Troubleshooting
 
-### Token not found — "CYBRIX_TOKEN is not set"
+<details>
+<summary><strong>"CYBRIX_TOKEN is not set"</strong></summary>
 
-The skill looks for your token in three places, in order:
-1. The `CYBRIX_TOKEN` environment variable
-2. `~/.config/cybrix/token`
-3. `.cybrix/token` in the project root
+Set it with `export CYBRIX_TOKEN=vd_...` or save to `~/.config/cybrix/token` as shown above.
+</details>
 
-If none are found, set it with `export CYBRIX_TOKEN=vd_...` or save
-it to `~/.config/cybrix/token` as shown in the install steps above.
+<details>
+<summary><strong>"Output directory not found"</strong></summary>
 
-### "Output directory not found"
+Run your build manually first (`npm run build`, `hugo`, etc.) to confirm it works, then retry. If the output path is non-standard, tell Claude the correct path when prompted.
+</details>
 
-The build output could not be located. Most common causes:
+<details>
+<summary><strong>"Build failed"</strong></summary>
 
-- **Build hasn't run yet** — run it manually first (`npm run build`, `hugo`, etc.) to confirm it works, then let Claude retry.
-- **Non-standard output path** — when Claude asks to confirm the output directory, type the correct path.
-- **Wrong working directory** — make sure you opened Claude Code from your project root, not a subdirectory.
+Claude shows the last 40 lines of output. Fix the error (missing `node_modules`, missing env vars, TypeScript errors) then say "deploy again".
+</details>
 
-### "Build failed. Fix the error above and try again."
+<details>
+<summary><strong>"Free tier project limit reached"</strong></summary>
 
-The build command returned an error. Claude shows the last 40 lines.
-Fix the error first, then say "deploy again".
+Free plan is limited to 1 project. Upgrade at [cybrix.cc/pricing](https://cybrix.cc/pricing) or delete an existing project from your [dashboard](https://app.cybrix.cc/dashboard).
+</details>
 
-Common causes: missing `node_modules` (run `npm install`), missing env vars in `.env`, TypeScript errors.
+<details>
+<summary><strong>"Bundle too large"</strong></summary>
 
-### "Free tier project limit reached"
+Gzipped output exceeds 100 MB. Common causes: source maps in production output, `node_modules` accidentally in `dist`, large unoptimised assets.
+</details>
 
-You're on the free plan (1 project). Either upgrade at [cybrix.cc/pricing](https://cybrix.cc/pricing)
-or delete an existing project from your [dashboard](https://app.cybrix.cc/dashboard).
+---
 
-### "Bundle too large"
+## Support
 
-The gzipped output exceeds 100 MB. Common causes: source maps in production output,
-`node_modules` accidentally in `dist`, large unoptimised images or videos.
-Check your build config and audit the output directory.
+- Bug in the skill — [open an issue](https://github.com/cybrixcc/cybrix-skills/issues)
+- Account or deploy problem — `support@cybrix.cc` or [app.cybrix.cc](https://app.cybrix.cc)
+- Contributing a fix — see [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
 ## License
 
-MIT. See [`LICENSE`](./LICENSE).
-
-## Issues and support
-
-| Type                      | Where                                                         |
-|---------------------------|---------------------------------------------------------------|
-| Bug in the skill          | Open an issue in this repo                                    |
-| Account or deploy problem | `support@cybrix.cc` or [app.cybrix.cc](https://app.cybrix.cc) |
-| Contributing a fix        | See [CONTRIBUTING.md](./CONTRIBUTING.md)                      |
+MIT — see [LICENSE](./LICENSE).
