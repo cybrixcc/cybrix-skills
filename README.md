@@ -7,9 +7,9 @@
 
 **Tell Claude to deploy. Get a live HTTPS URL in under 60 seconds.**
 
-Cybrix is a hosting service for static sites. This plugin adds a `cybrix-deploy` skill to [Claude Code](https://claude.ai/code) — Claude runs the build, packages the output, uploads it to Cloudflare's edge network, and hands you a live URL directly in the chat.
+Cybrix is a hosting service for static sites built for coaches, designers, and creators who build with Claude but don't do DevOps. This plugin adds a `cybrix-deploy` skill to [Claude Code](https://claude.ai/code) — Claude runs the build, packages the output, uploads it to Cloudflare's edge network, and hands you a live URL directly in the chat.
 
-No config files. No CI setup. No dashboards. Just talk.
+No Git. No GitHub account. No config files. No dashboards. Just talk.
 
 ```
 > Deploy this with cybrix
@@ -107,10 +107,12 @@ The skill looks for your token in this order:
 
 ## Pricing
 
-| Plan        | Projects | Domain        | Deploy history     |
-|-------------|----------|---------------|--------------------|
-| Free        | 1        | `*.cbrx.cc`   | 7 days             |
-| Pro — $9/mo | 10       | Custom domain | 90 days + rollback |
+| Plan        | Projects | Deploys   | Domain        | Deploy history     | Commercial use |
+|-------------|----------|-----------|---------------|--------------------|----------------|
+| Free        | 1        | Unlimited | `*.cbrx.cc`   | 7 days             | [allowed]      |
+| Pro — $9/mo | 10       | Unlimited | Custom domain | 90 days + rollback | [allowed]      |
+
+Both plans allow commercial use. No Fair Use restrictions.
 
 Pro also includes Telegram deploy alerts.
 → [cybrix.cc/pricing](https://cybrix.cc/pricing)
