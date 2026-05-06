@@ -107,12 +107,12 @@ The skill looks for your token in this order:
 
 ## Pricing
 
-| Plan            | Projects | Domain          | Deploys/month |
-|-----------------|----------|-----------------|---------------|
-| Free            | 1        | `*.cbrx.cc`     | 50            |
-| Pro — $9/mo     | 10       | Custom domain   | Unlimited     |
+| Plan        | Projects | Domain        | History  |
+|-------------|----------|---------------|----------|
+| Free        | 1        | `*.cbrx.cc`   | 7 days   |
+| Pro — $9/mo | 10       | Custom domain | 90 days + rollback |
 
-Pro includes custom domains, password protection, and Telegram deploy alerts.
+Pro also includes Telegram deploy alerts.
 → [cybrix.cc/pricing](https://cybrix.cc/pricing)
 
 ---
