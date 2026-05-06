@@ -108,6 +108,7 @@ Expected: tar → POST → `deployment_id=test-123` → poll pending → poll li
 
 ## Token lookup order (deploy.sh)
 
-1. `$CYBRIX_TOKEN` env var
-2. `~/.config/cybrix/token`
-3. `.cybrix/token` in project root
+1. `$CYBRIX_DEPLOY_TOKEN` (Claude Code userConfig keychain -- set automatically)
+2. `$CYBRIX_TOKEN` env var
+3. `~/.config/cybrix/token`
+4. `.cybrix/token` in project root
